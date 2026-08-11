@@ -26,14 +26,14 @@ Adapter to control Hyundai or Kia vehicle (until 2023)
 
 ------------------------------------------------------------------------------------
 ## Changelog
-### **WORK IN PROGRESS**
+### 3.1.31 (2026-08-11)
+* (arteck) Dependencies have been updated
 * (meistermopper) Add 1.5s rate-limit pause before vehicle.location() API calls to prevent 4004 Duplicate Request errors
 ### 3.1.30 (2026-08-11)
 * (meistermopper) Fix vehicle location data extraction for Kia and Hyundai CCS2 vehicles and prioritize dedicated location API
 * (meistermopper) Add control.force_location button and implement live telematics POST location/status polling directly from vehicle hardware
 * (meistermopper) Fix TypeScript type definitions and unsafe property access in status parsing
 
-### 3.1.29 (2026-08-05)
 * (copilot) Adapter requires node.js >= 22 now
 * (ipod86) add Tokenmanager
 
@@ -43,9 +43,6 @@ Adapter to control Hyundai or Kia vehicle (until 2023)
 
 ### 3.1.27 (2026-04-06)
 * (arteck) fix position_text 
-* (arteck) Dependencies have been updated
-
-### 3.1.26 (2026-01-17)
 * (arteck) Dependencies have been updated
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "bluelink",
-    "version": "3.1.30",
+    "version": "3.1.31",
     "news": {
+      "3.1.31": {
+        "en": "Dependencies have been updated",
+        "de": "Die Abhängigkeiten wurden aktualisiert.",
+        "ru": "Зависимости обновлены.",
+        "pt": "As dependências foram atualizadas.",
+        "nl": "Afhankelijkheden zijn bijgewerkt.",
+        "fr": "Les dépendances ont été mises à jour",
+        "it": "Le dipendenze sono state aggiornate",
+        "es": "Se han actualizado las dependencias.",
+        "pl": "Zaktualizowano zależności",
+        "uk": "Залежності оновлено",
+        "zh-cn": "依赖项已更新"
+      },
       "3.1.30": {
         "en": "Fix vehicle location data extraction for Kia and Hyundai CCS2 vehicles and prioritize dedicated location API\nAdd control.force_location button and implement live telematics POST location/status polling directly from vehicle hardware\nFix TypeScript type definitions and unsafe property access in status parsing",
         "de": "Behebung der Fehlerbehebung bei der Extraktion von Fahrzeugstandortdaten für Kia- und Hyundai-CCS2-Fahrzeuge und Priorisierung einer dedizierten Standort-API\nFügen Sie die Schaltfläche „control.force_location“ hinzu und implementieren Sie die Live-Telematik-POST-Abfrage von Standort/Status direkt von der Fahrzeughardware.\nBeheben Sie TypeScript-Typdefinitionen und unsicheren Eigenschaftszugriff beim Status-Parsing.",
@@ -80,19 +93,6 @@
         "pl": "Zaktualizowano zależności\ndodaje dokumentację dotyczącą procesu generowania symboli dla HYUNDAI i KIA",
         "uk": "Залежність було оновлено\nдодає документацію про процес генерації токенів для HYUNDAI та KIA",
         "zh-cn": "依赖关系已更新\n为 HYUNDAI 和 KIA 添加关于符号生成过程的文档"
-      },
-      "3.1.24": {
-        "en": "fix vehicles > 2 in account",
-        "de": "feste fahrzeuge > 2 in rechnung gestellt",
-        "ru": "ремонт автомобилей 2 на счету",
-        "pt": "veículos de reparação > 2 na conta",
-        "nl": "vastzetten van voertuigen > 2 in rekening",
-        "fr": "fixer les véhicules > 2 en compte",
-        "it": "veicoli fissi > 2 in conto",
-        "es": "vehículos fijos 2 en cuenta",
-        "pl": "pojazdy naprawcze > 2 na rachunek",
-        "uk": "фіксуючі засоби > 2 в акаунті",
-        "zh-cn": "固定车辆 > 2个账户"
       }
     },
     "titleLang": {
