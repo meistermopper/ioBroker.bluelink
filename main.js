@@ -692,8 +692,8 @@ class Bluelink extends utils.Adapter {
         // 1. Query dedicated vehicle.location() endpoint first (same GET /location API endpoint used by official app)
         if (vehicle && typeof vehicle.location === 'function') {
             try {
-                // Short 1.5s delay to avoid Kia/Hyundai 4004 Duplicate Request rate-limit after fullStatus
-                await new Promise(resolve => this.setTimeout(resolve, 1500));
+                // Short 3s delay to avoid Kia/Hyundai 4004 Duplicate Request rate-limit after fullStatus
+                await new Promise(resolve => this.setTimeout(resolve, 3000));
                 this.log.debug(`Requesting dedicated vehicle.location() for ${vin}...`);
                 const loc = await vehicle.location();
                 this.log.debug(`vehicle.location() raw response for ${vin}: ${JSON.stringify(loc)}`);

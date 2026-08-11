@@ -26,6 +26,8 @@ Adapter to control Hyundai or Kia vehicle (until 2023)
 
 ------------------------------------------------------------------------------------
 ## Changelog
+### **WORK IN PROGRESS**
+* (meistermopper) Add dev and build scripts to package.json and set 3s rate-limit delay before vehicle.location()
 ### 3.1.31 (2026-08-11)
 * (arteck) Dependencies have been updated
 * (meistermopper) Add 1.5s rate-limit pause before vehicle.location() API calls to prevent 4004 Duplicate Request errors
