@@ -1,6 +1,7 @@
 'use strict';
 
 const utils = require('@iobroker/adapter-core');
+const crypto = require('node:crypto');
 const {BlueLinky} = require('bluelinky');
 
 const Json2iob = require('./lib/json2iob');
@@ -80,6 +81,7 @@ class Bluelink extends utils.Adapter {
     async onReady() {
         //first check account settings
         this.setState('info.connection', false, true);
+        tokenManager.setLanguage(this.config.language);
         let loginGo = true;
 
         if (this.config.motor == 'GAS') {
@@ -120,6 +122,18 @@ class Bluelink extends utils.Adapter {
             type: 'state',
             common: {
                 name: 'Active login mode (cci = OneApp workaround, legacy = original flow)',
+                type: 'string',
+                role: 'text',
+                read: true,
+                write: false,
+                def: '',
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync('info.tokenExpiry', {
+            type: 'state',
+            common: {
+                name: 'Expiry of the current access token (CCS)',
                 type: 'string',
                 role: 'text',
                 read: true,
@@ -270,7 +284,7 @@ class Bluelink extends utils.Adapter {
                             });
                             this.log.debug(JSON.stringify(response));
                         } catch (err) {
-                            this.log.error(err);
+                            this.log.error(err instanceof Error ? err.message : String(err));
                         }
                         break;
                     case 'stop':
@@ -321,21 +335,21 @@ class Bluelink extends utils.Adapter {
                     case 'charge_limit_fast':
                     case 'charge_limit_slow':
                         if (!state.ack) {
-                            if (!POSSIBLE_CHARGE_LIMIT_VALUES.includes(state.val)) {
+                            if (!POSSIBLE_CHARGE_LIMIT_VALUES.includes(Number(state.val))) {
                                 this.log.error(`Charge target values are limited to ${POSSIBLE_CHARGE_LIMIT_VALUES.join(', ')}`);
                             } else {
                                 const charge_option = {fast: this.fast_charging, slow: this.slow_charging};
                                 if (tmpControl == 'charge_limit_fast') {
                                     this.log.info('Set new charging options charge_limit_fast');
                                     const charge_limit_slow = await this.getStateAsync(`${vin}.control.charge_limit_slow`);
-                                    charge_option.fast = state.val;
-                                    charge_option.slow = charge_limit_slow ? charge_limit_slow.val : this.slow_charging;
+                                    charge_option.fast = Number(state.val);
+                                    charge_option.slow = (charge_limit_slow && typeof charge_limit_slow.val === 'number') ? charge_limit_slow.val : this.slow_charging;
                                 }
                                 if (tmpControl == 'charge_limit_slow') {
                                     this.log.info('Set new charging options charge_limit_slow');
                                     const charge_limit_fast = await this.getStateAsync(`${vin}.control.charge_limit_fast`);
-                                    charge_option.slow = state.val;
-                                    charge_option.fast = charge_limit_fast ? charge_limit_fast.val : this.fast_charging;
+                                    charge_option.slow = Number(state.val);
+                                    charge_option.fast = (charge_limit_fast && typeof charge_limit_fast.val === 'number') ? charge_limit_fast.val : this.fast_charging;
                                 }
                                 response = await vehicle.setChargeTargets(charge_option);
                                 this.log.debug(JSON.stringify(response));
@@ -406,7 +420,8 @@ class Bluelink extends utils.Adapter {
             this.setState('info.lastTokenRefresh', Date.now(), true);
             return true;
         } catch (err) {
-            this.log.error(`Token auto-renewal failed: ${err.message || err}`);
+            const msg = err instanceof Error ? err.message : String(err);
+            this.log.error(`Token auto-renewal failed: ${msg}`);
             return false;
         }
     }
@@ -435,12 +450,13 @@ class Bluelink extends utils.Adapter {
     async login() {
         try {
             const activeToken = this.config.refreshToken || this.config.client_secret || '';
-            // Legacy refresh_tokens are the 48-char uppercase-alnum format bluelinky's own
-            // grant_type=refresh_token call expects; CCI ones aren't, and bluelinky rejects
-            // them outright ("Could not manage to get token") - see tokenManager.js. Older
-            // configs saved before tokenType existed are sniffed by format.
+            // For EU vehicles (Hyundai / Kia), the legacy login endpoint was permanently deprecated
+            // and blocked by the IDP. The OneApp/CCI flow MUST always be used for EU.
+            const isEurope = this.config.brand === 'hyundai' || this.config.brand === 'kia';
             const isCci = this.config.tokenType === 'cci' ||
-                (!this.config.tokenType && !!activeToken && !/^[A-Z0-9]{48}$/.test(activeToken));
+                !!this.parseEvccBundle(activeToken) ||
+                (!this.config.tokenType && !!activeToken && !/^[A-Z0-9]{48}$/.test(activeToken)) ||
+                (isEurope && (!activeToken || this.config.tokenType !== 'legacy'));
             this.log.info(`Login to api – token source: ${this.config.refreshToken ? 'refreshToken' : 'client_secret(legacy)'}, tokenLen=${activeToken.length}${isCci ? ' (CCI/CCS mode)' : ''}`);
             this.setState('info.tokenType', isCci ? 'cci' : 'legacy', true);
 
@@ -459,10 +475,11 @@ class Bluelink extends utils.Adapter {
                 pin: this.config.client_secret_pin,
                 brand: this.config.brand,
                 region: 'EU',
-                language: this.config.language,
+                language: tokenManager.getLanguage(),
                 autoLogin: !isCci,
             };
 
+            // @ts-expect-error bluelinky config types expect narrow Brand/EULanguages unions
             blueLinkyClient = new BlueLinky(loginOptions);
             create_tools = new Create_tools(this);
 
@@ -473,7 +490,8 @@ class Bluelink extends utils.Adapter {
                 const nowSec = Math.floor(Date.now() / 1000);
                 const ctrl = blueLinkyClient['controller'];
                 ctrl.session.accessToken = cciPrimed.accessToken;
-                ctrl.session.tokenExpiresAt = nowSec + (cciPrimed.cci.expiresIn || 3599) - 60;
+                ctrl.session.tokenExpiresAt = nowSec + (cciPrimed.cci.ccsExpiresIn || cciPrimed.cci.expiresIn || 3599) - 60;
+                this.setState('info.tokenExpiry', new Date((ctrl.session.tokenExpiresAt + 60) * 1000).toISOString(), true);
                 ctrl.refreshAccessToken = this.makeCciRefresher();
 
                 // bluelinky's own login() registers a device ID with the vehicle API as its
@@ -488,7 +506,9 @@ class Bluelink extends utils.Adapter {
                         msg => this.log.debug(msg),
                     );
                 } catch (err) {
-                    this.log.warn(`[login] CCI device registration failed (${err.message || err}) — vehicle calls will likely fail with "Invalid deviceId"`);
+                    const msg = err instanceof Error ? err.message : String(err);
+                    this.log.warn(`[login] CCI device registration failed (${msg}) — falling back to random device identity`);
+                    ctrl.session.deviceId = (cciPrimed.cci && cciPrimed.cci.deviceId) || crypto.randomUUID();
                 }
             }
 
@@ -590,6 +610,57 @@ class Bluelink extends utils.Adapter {
     }
 
     /**
+     * Convert an evcc token bundle (JSON from the settings table, key "bluelink-cci.<brand>.<user>")
+     * pasted into the Refresh Token field into the adapter's CCI token set.
+     *
+     * @param {string} value The pasted string value
+     * @returns {object|null} Parsed CCI token set or null
+     */
+    parseEvccBundle(value) {
+        if (typeof value !== 'string') {
+            return null;
+        }
+        let text = value.trim().replace(/^\uFEFF/, '');
+        // SQLite tools sometimes export the value as a quoted string (JSON-escaped or CSV-style "" doubling)
+        if (text.startsWith('"') && text.endsWith('"')) {
+            try {
+                text = JSON.parse(text);
+            } catch {
+                text = text.slice(1, -1).replace(/""/g, '"');
+            }
+        }
+        if (!text.startsWith('{')) {
+            if (text.length > 100) {
+                this.log.warn(`[parseEvccBundle] Refresh Token field is ${text.length} chars long but does not start with "{" (first chars: ${JSON.stringify(text.slice(0, 4))}) - not treated as evcc bundle`);
+            }
+            return null;
+        }
+        try {
+            const b = JSON.parse(text);
+            if (!b.refresh_token || !b.cci_access_token) {
+                this.log.warn(`[parseEvccBundle] JSON found in Refresh Token field but required keys are missing (keys: ${Object.keys(b).join(', ')})`);
+                return null;
+            }
+            return {
+                accessToken: b.cci_access_token,
+                refreshToken: b.refresh_token,
+                exchangeableToken: b.exchangeable_token || '',
+                exchangeableRefreshToken: b.exchangeable_refresh_token || '',
+                nonCcsToken: b.non_ccs_token || '',
+                nonCcsRefreshToken: b.non_ccs_refresh_token || '',
+                idToken: b.id_token || '',
+                expiresIn: 3599,
+                ccsExpiresIn: 3600,
+                deviceId: b.device_id || '',
+            };
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            this.log.warn(`[parseEvccBundle] Refresh Token field looks like JSON but is invalid: ${msg}`);
+            return null;
+        }
+    }
+
+    /**
      * Get a fresh CCS access token for the CCI/OneApp login path (see tokenManager.js),
      * without going through bluelinky's own (incompatible) refresh/login. Tries a cheap
      * CCI token-refresh using the persisted CCI token set first; only falls back to a
@@ -603,15 +674,21 @@ class Bluelink extends utils.Adapter {
      */
     async prepareCciSession() {
         let cciSet = null;
+        let usedPastedBundle = false;
         try {
-            if (this.config.cciTokenSet) {
+            const pasted = this.parseEvccBundle(this.config.refreshToken);
+            if (pasted) {
+                this.log.warn('[prepareCciSession] Using evcc token bundle from the Refresh Token field. evcc and this adapter now share one token set - whichever refreshes first may invalidate the other.');
+                cciSet = pasted;
+                usedPastedBundle = true;
+            } else if (this.config.cciTokenSet) {
                 // js-controller already decrypts native fields listed in io-package.json's
                 // encryptedNative into this.config.* on adapter start - unlike
                 // saveTokenToConfig()'s direct setForeignObjectAsync write, which bypasses
                 // that pipeline and has to call this.encrypt() itself.
                 cciSet = JSON.parse(this.config.cciTokenSet);
             }
-        } catch (e) {
+        } catch (_e) {
             this.log.warn('[prepareCciSession] Stored CCI token set unreadable — forcing full login');
         }
         // Reflects what's currently on disk, so persistRotatedCciTokenIfNeeded() doesn't
@@ -623,9 +700,18 @@ class Bluelink extends utils.Adapter {
                 const refreshed = await tokenManager.refreshCciToken(this.config.brand, cciSet, msg => this.log.debug(msg));
                 this._cciTokenSet = refreshed.cci;
                 this.setState('info.lastTokenRefresh', Date.now(), true);
+                if (usedPastedBundle) {
+                    // Replace the pasted evcc JSON by the adapter's own rotated token set so a restart
+                    // doesn't reuse the stale bundle (this restarts the adapter once).
+                    const expiresAt = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString();
+                    await this.saveTokenToConfig(refreshed.cci.refreshToken, expiresAt, { cci: refreshed.cci });
+                    this._cciPersistedRefreshToken = refreshed.cci.refreshToken;
+                    this.log.info('[prepareCciSession] evcc bundle converted and saved as own token set');
+                }
                 return refreshed;
             } catch (err) {
-                this.log.warn(`[prepareCciSession] CCI token refresh failed (${err.message || err}) — falling back to full login`);
+                const msg = err instanceof Error ? err.message : String(err);
+                this.log.warn(`[prepareCciSession] CCI token refresh failed (${msg}) — falling back to full login`);
             }
         }
 
@@ -636,7 +722,7 @@ class Bluelink extends utils.Adapter {
         }
 
         try {
-            const full = await tokenManager.fetchToken(this.config.brand, this.config.username, this.config.password, msg => this.log.debug(msg));
+            const full = await tokenManager.fetchToken(this.config.brand, this.config.username, this.config.password, msg => this.log.debug(msg), cciSet && cciSet.deviceId);
             await this.saveTokenToConfig(full.refreshToken, full.expiresAt, { cci: full.cci });
             if (!full.cci) {
                 this.log.info('[prepareCciSession] Obtained a legacy-format token instead — adapter restarts into the legacy flow');
@@ -647,11 +733,12 @@ class Bluelink extends utils.Adapter {
             this.setState('info.lastTokenRefresh', Date.now(), true);
             return { accessToken: full.accessToken, cci: full.cci };
         } catch (err) {
-            this.log.error(`[prepareCciSession] Full login failed: ${err.message || err}`);
+            const msg = err instanceof Error ? err.message : String(err);
+            this.log.error(`[prepareCciSession] Full login failed: ${msg}`);
             this.setState('info.connection', false, true);
             adapterIntervals.loginRetryTimeout = setTimeout(async () => {
- await this.login(); 
-}, 1000 * 60 * 60);
+                await this.login();
+            }, 1000 * 60 * 60);
             return null;
         }
     }
@@ -667,7 +754,8 @@ class Bluelink extends utils.Adapter {
             const refreshed = await tokenManager.refreshCciToken(this.config.brand, this._cciTokenSet, msg => this.log.debug(msg));
             this._cciTokenSet = refreshed.cci;
             sess.accessToken = refreshed.accessToken;
-            sess.tokenExpiresAt = Math.floor(Date.now() / 1000) + (refreshed.cci.expiresIn || 3599) - 60;
+            sess.tokenExpiresAt = Math.floor(Date.now() / 1000) + (refreshed.cci.ccsExpiresIn || refreshed.cci.expiresIn || 3599) - 60;
+            this.setState('info.tokenExpiry', new Date((sess.tokenExpiresAt + 60) * 1000).toISOString(), true);
             this.setState('info.lastTokenRefresh', Date.now(), true);
             this.log.info('[refreshAccessToken] CCS token refreshed via CCI (kept in memory, not persisted)');
             return 'Token refreshed';
@@ -712,7 +800,7 @@ class Bluelink extends utils.Adapter {
                 continue;
             }
 
-            if (this.batteryState12V[vin] && batteryControlState12V && this.batteryState12V[vin] < batteryControlState12V.val && force_update_obj.val) {
+            if (this.batteryState12V[vin] && batteryControlState12V && typeof batteryControlState12V.val === 'number' && this.batteryState12V[vin] < batteryControlState12V.val && force_update_obj.val) {
                 this.log.warn(`Vin${vin} 12V Battery state is low: ${vin} ${this.batteryState12V[vin]}%. Recharge to prevent damage!`);
                 if (this.config.protectAgainstDeepDischarge && !force) {
                     this.log.warn('Auto Refresh is disabled, only use force refresh to reenable refresh if you are willing to risk your battery');
@@ -909,6 +997,8 @@ class Bluelink extends utils.Adapter {
         // trigger an additional live location request to the vehicle/backend.
         if (force_update && vehicle && typeof vehicle.location === 'function') {
             try {
+                // Short 3s delay to avoid Kia/Hyundai 4004 Duplicate Request rate-limit after fullStatus
+                await new Promise(resolve => this.setTimeout(() => resolve(undefined), 3000));
                 this.log.debug(`Requesting dedicated vehicle.location() for ${vin}...`);
                 const loc = await vehicle.location();
                 this.log.debug(`vehicle.location() raw response for ${vin}: ${JSON.stringify(loc)}`);
@@ -1207,7 +1297,7 @@ class Bluelink extends utils.Adapter {
                 this.batteryState12V[vin] = newStatus.engine.batteryCharge12v;
             }
         } catch (err) {
-            this.log.error(err.stack);
+            this.log.error(err instanceof Error ? err.stack || err.message : String(err));
         }
     }
 
@@ -1460,8 +1550,11 @@ class Bluelink extends utils.Adapter {
                 this.batteryState12V[vin] = newStatus.vehicleStatus.battery.batSoc;
             }
         } catch (err) {
-            this.log.error(err.message);
-            this.log.error(err.stack);
+            const msg = err instanceof Error ? err.message : String(err);
+            this.log.error(msg);
+            if (err instanceof Error && err.stack) {
+                this.log.error(err.stack);
+            }
         }
     }
 

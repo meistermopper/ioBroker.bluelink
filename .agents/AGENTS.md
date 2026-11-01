@@ -56,3 +56,15 @@ This file defines style guidelines, constraints, and general instructions for AI
 ## 10. Git Commit & Push Authorization
 - **Constraint:** AI agents MUST NEVER perform `git commit` or `git push` operations automatically without explicit, prior user approval in the chat.
 - **Workflow:** Always prepare code modifications locally and ask the user for explicit confirmation before staging, committing, or pushing changes to remote repositories.
+- **Co-Author Attribution:** Every commit created or suggested with AI assistance must include the Git trailer:
+  ```git
+  Co-authored-by: Gemini <noreply@google.com>
+  ```
+  Example:
+  ```bash
+  git commit -m "feat: add remote control status" -m "Co-authored-by: Gemini <noreply@google.com>"
+  ```
+
+## 11. No Automated AI Commit Hooks or Git Hook Tooling in Forks / PRs
+- **Constraint:** Do NOT introduce, commit, or configure Git hook tooling (e.g., Husky, `commitlint`) or automated AI commit hooks (such as scripts sending `git diff` to external LLM APIs like Google Gemini or OpenAI) in repositories or pull requests intended for upstream.
+- **Rationale:** Intercepting Git commits and transmitting code diffs to third-party APIs without explicit consent introduces data privacy, telemetry, and supply-chain concerns for other contributors and maintainers, and leads to rejection by upstream repositories.
