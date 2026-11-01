@@ -1,9 +1,11 @@
 # Older changes
+## 3.1.31 (2026-08-11)
+* (arteck) Dependencies have been updated
+
 ## 3.1.30 (2026-08-11)
 * (meistermopper) Fix vehicle location data extraction for Kia and Hyundai CCS2 vehicles and prioritize dedicated location API
 * (meistermopper) Add control.force_location button and implement live telematics POST location/status polling directly from vehicle hardware
 * (meistermopper) Fix TypeScript type definitions and unsafe property access in status parsing
-
 
 ## 3.1.29 (2026-08-05)
 * (copilot) Adapter requires node.js >= 22 now

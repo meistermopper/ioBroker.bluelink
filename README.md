@@ -26,8 +26,7 @@ Adapter to control Hyundai or Kia vehicle (until 2023)
 
 ------------------------------------------------------------------------------------
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 3.1.36 (2026-11-01)
 * (meistermopper) Fix EU login: enforce OneApp/CCI flow for European vehicles when username/password are provided
 * (meistermopper) Integrate evcc-compatible Node TLS, cookie jar scoping, and IDP redirect hop handling
 * (meistermopper) Add random device ID fallback if legacy device registration fails (hyundai_kia_connect_api #1342)
@@ -44,9 +43,6 @@ Adapter to control Hyundai or Kia vehicle (until 2023)
 
 ### 3.1.32 (2026-08-20)
 * (ipod86) Fix EU Hyundai/Kia login
-
-### 3.1.31 (2026-08-11)
-* (arteck) Dependencies have been updated
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 

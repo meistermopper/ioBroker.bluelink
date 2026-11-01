@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "bluelink",
-    "version": "3.1.35",
+    "version": "3.1.36",
     "news": {
+      "3.1.36": {
+        "en": "Fix EU login: enforce OneApp/CCI flow for European vehicles when username/password are provided\nIntegrate evcc-compatible Node TLS, cookie jar scoping, and IDP redirect hop handling\nAdd random device ID fallback if legacy device registration fails (hyundai_kia_connect_api #1342)\nAdd support for importing evcc token bundles into the refresh token field",
+        "de": "Fix EU Login: OneApp/CCI Flow für europäische Fahrzeuge mit Username/Passwort erzwingen\nIntegrieren Sie EVCC-kompatibles Node TLS, Cookie Jar Scoping und IDP Redirect Hop Handling\nFallback für zufällige Geräte-ID hinzufügen, falls es fehlschlägt (hyundai_kia_connect_api #1342)\nUnterstützt den Import von EVCC-Tokenpaketen in das Feld Refresh",
+        "ru": "Исправьте вход в ЕС: используйте режим OneApp/CCI для европейских автомобилей, указав имя пользователя и пароль\nИнтегрируйте протокол Node TLS, совместимый с evcc, область действия файлов cookie и обработку переходов по перенаправлению IDP\nДобавьте запасной вариант случайного идентификатора устройства в случае сбоя регистрации устаревшего устройства (hyundai_kia_connect_api #1342)\nДобавьте поддержку импорта пакетов токенов evcc в поле refresh token",
+        "pt": "Corrija o login na UE: imponha o fluxo OneApp/CCI para veículos europeus com nome de usuário/senha\nIntegre Node TLS compatível com evcc, escopo de cookie jar e IDP redirect hop\nAdicione um ID aleatório se o registro do antigo falhar (hyundai_kia_connect_api #1342)\nSuporta importar pacotes de tokens evcc no campo refresh token",
+        "nl": "Aanmelding in de EU corrigeren: de OneApp/CCI-flow voor Europese voertuigen afdwingen wanneer gebruikersnaam/wachtwoord wordt verstrekt\nIntegreer Node TLS die compatibel zijn met evcc, de scoping van de cookiepot en de verwerking van IDP-omleidingen\nVoeg een willekeurige reservekopie van de apparaat-ID toe als de registratie van een oud apparaat mislukt (hyundai_kia_connect_api #1342)\nOndersteuning toegevoegd voor het importeren van evcc-tokenbundels in het veld Vernieuwingstokens",
+        "fr": "Fix EU login : appliquez OneApp/CCI Flow aux véhicules européens avec nom d'utilisateur/mot de passe\nIntégrez Node TLS, Cookie Jar Scoping et IDP Redirect Hop Manage\nAjouter un identifiant aléatoire en cas d'échec de l'enregistrement de l'ancien appareil (hyundai kia_connect_api #1342)\nAjout de la possibilité d'importer des packs de jetons EVCC dans le champ des jetons Refresh",
+        "it": "Login UE fisso: applica il flusso OneApp/CCI per i veicoli europei fornendo nome utente/password\nIntegra Node TLS compatibile con evcc, cookie jar scoping e IDP redirect hop\nAggiunga un ID casuale se la registrazione del dispositivo precedente non va a buon fine #1342\nAggiunga l'importazione di pacchetti di token evcc nel campo refresh token",
+        "es": "Fijar inicio de sesión en la UE: forzar el flujo de OneApp/CCI para los vehículos europeos con nombre de usuario y contraseña\nIntegre Node TLS, cookie jar scoping y IDP redirect hop, compatibles con evcc\nAñadir ID de dispositivo aleatorio si el registro del dispositivo antiguo falla (hyundai_kia_connect_api #1342)\nAñadir soporte para importar paquetes de fichas evcc al campo Refresh Token",
+        "pl": "Napraw login UE: wymuszaj przepływ OneApp/CCI dla pojazdów europejskich, gdy podana jest nazwa użytkownika/hasło\nZintegruj kompatybilny z evcc Node TLS, zasięg słoików cookie i obsługę skoków przekierowań IDP\nDodaj losowy identyfikator urządzenia awaryjnego, jeśli rejestracja starszego urządzenia nie powiedzie się (hyundai_kia_connect_api #1342)\nDodaj obsługę importowania pakietów tokenów evcc do pola tokena odświeżania",
+        "uk": "Виправлення входу в ЄС: запровадити потік OneApp/CCI для європейських транспортних засобів, коли вказано ім'я користувача/пароль\nІнтегруйте TLS, сумісний з evcc-нодом, визначення обсягу банок для файлів cookie та обробку переадресації IDP\nДодайте випадковий запас ідентифікатора пристрою, якщо реєстрація застарілого пристрою не вдається (hyundai_kia_connect_api #1342)\nДодайте підтримку імпорту пакетів токенів evcc у поле оновлення токена",
+        "zh-cn": "修复欧盟登录问题：提供用户名/密码后，对欧洲车辆强制执行 OneApp/CCI 流程\n集成与 evcc 兼容的节点 TLS、cookie jar 范围界定和 IDP 重定向跳跃处理\n如果旧设备注册失败，则添加随机设备 ID 备用功能 (hyundai_kia_connect_api #1342)\n添加对将 evcc 代币包导入刷新令牌字段的支持"
+      },
       "3.1.35": {
         "en": "Fix EU Hyundai/Kia login",
         "de": "Fix EU Hyundai/Kia Login",
@@ -80,19 +93,6 @@
         "pl": "Napraw ekstrakcję danych o lokalizacji pojazdów Kia i Hyundai CCS2 i nadaj priorytet dedykowanemu interfejsowi API lokalizacji\nDodaj przycisk control.force_location i wdróż funkcję telematyki POST do pobierania danych o lokalizacji/statusie na żywo bezpośrednio ze sprzętu pojazdu\nNapraw definicje typu TypeScript i niebezpieczny dostęp do właściwości podczas analizy statusu",
         "uk": "Виправлено вилучення даних про місцезнаходження транспортних засобів для автомобілів Kia та Hyundai CCS2 та надано пріоритет виділеному API визначення місцезнаходження\nДодайте кнопку control.force_location та реалізуйте опитування місцезнаходження/статусу в режимі реального часу за допомогою телематики POST безпосередньо з апаратного забезпечення транспортного засобу.\nВиправлено визначення типів TypeScript та небезпечний доступ до властивостей під час розбору статусу",
         "zh-cn": "修复起亚和现代CCS2车辆的车辆位置数据提取问题，并优先考虑专用位置API。\n添加 control.force_location 按钮，并直接从车辆硬件实现实时远程信息处理 POST 位置/状态轮询\n修复状态解析中的 TypeScript 类型定义和不安全属性访问"
-      },
-      "3.1.29": {
-        "en": "Adapter requires node.js >= 22 now\nfix login hyundai",
-        "de": "Der Adapter benötigt jetzt Node.js >= 22.\nHyundai-Login reparieren",
-        "ru": "Для работы адаптера требуется Node.js версии >= 22.\nисправить вход в систему Hyundai",
-        "pt": "O adaptador agora requer Node.js >= 22.\nCorrigir login Hyundai",
-        "nl": "De adapter vereist nu Node.js versie 22 of hoger.\nHyundai login repareren",
-        "fr": "L'adaptateur nécessite désormais Node.js >= 22.\nRésoudre les problèmes de connexion Hyundai",
-        "it": "L'adattatore ora richiede Node.js >= 22\nrisolvere il problema di accesso hyundai",
-        "es": "El adaptador ahora requiere node.js >= 22.\nSolucionar el problema de inicio de sesión de Hyundai",
-        "pl": "Adapter wymaga teraz node.js >= 22\nnapraw logowanie hyundai",
-        "uk": "Адаптер тепер вимагає node.js >= 22\nвиправити вхід Hyundai",
-        "zh-cn": "适配器现在需要 node.js 版本 >= 22。\n修复现代汽车登录问题"
       }
     },
     "titleLang": {
