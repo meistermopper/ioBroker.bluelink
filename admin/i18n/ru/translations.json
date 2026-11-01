@@ -5,6 +5,8 @@
     "Pin": "pin-код (персональный идентификационный номер)",
     "VIN": "VIN (идентификационный номер транспортного средства)",
     "Brand": "Бренд",
+    "Motor": "Тип двигателя",
+    "Diesel/Benzin": "Дизель / Бензин",
     "Request max 400": "Максимум запросов в день 400",
     "Api settings": "Настройки API",
     "Account settings": "Настройки аккаунта",
@@ -12,11 +14,15 @@
     "Receive Daily drive History (EV cars only, needs 3 request per day)": "Получать ежедневную историю поездок (только для электромобилей, требуется 3 запроса в день)",
     "Stop refresh if 12V battery is under 10.5 V to protect against irreversible damage": "Остановить обновление, если напряжение 12V аккумулятора ниже 10.5 В, чтобы предотвратить необратимые повреждения",
     "ErrorConter": "Счетчик ошибок для перезапуска адаптера после сбоя соединения",
+    "errorCounter": "Счетчик ошибок для перезапуска адаптера после сбоя соединения",
     "App Lang": "Язык приложения",
     "Resolve the address from coordinates using openstreetmap": "Разрешить адрес из координат с помощью OpenStreetMap",
     "max km Range": "Диапазон Макса в км согласно данным",
     "only for PHEV": "только для PHEV",
     "Token-documentation": "Документация по токенам",
     "Password": "Пароль (пароль учётной записи)",
-    "Last successful login (auto-managed)": "Последний успешный вход (управляется автоматически)"
+    "Last successful login (auto-managed)": "Последний успешный вход (управляется автоматически)",
+    "Fallback": "Токен и резервный вариант (управляется автоматически)",
+    "Refresh Token (auto-managed / optional evcc fallback)": "Refresh Token (управляется автоматически / опциональный пакет evcc)",
+    "Automatic login (OneApp/CCI) only requires Username and Password above — leave Refresh Token empty on initial setup; the adapter fetches and renews the token automatically. Optional fallback: paste an evcc JSON token bundle (key bluelink-cci.<brand>.<user>) if you do not want to store your password.": "Для автоматического входа (OneApp/CCI) достаточно указать имя пользователя и пароль выше — оставьте поле Refresh Token пустым при первичной настройке; адаптер получает и обновляет токен автоматически. Опционально: вставьте JSON-пакет токенов из evcc (ключ bluelink-cci.<brand>.<user>), если вы не хотите сохранять пароль."
 }

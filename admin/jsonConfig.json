@@ -154,12 +154,12 @@
         },
         "_fallbackHelp": {
             "type": "staticText",
-            "text": "Falls der Login mit Benutzername/Passwort nicht klappt: Token manuell eintragen. Zum Generieren siehe Anleitung unten. Für automatische Erneuerung müssen oben trotzdem Benutzername und Passwort gesetzt sein — hilft aber nichts, wenn genau der automatische Login der Grund für den Fallback war. Dann muss bei Ablauf wieder von Hand ein neues Token eingetragen werden.",
+            "text": "Automatic login (OneApp/CCI) only requires Username and Password above — leave Refresh Token empty on initial setup; the adapter fetches and renews the token automatically. Optional fallback: paste an evcc JSON token bundle (key bluelink-cci.<brand>.<user>) if you do not want to store your password.",
             "newLine": true
         },
         "refreshToken": {
             "type": "password",
-            "label": "Refresh Token",
+            "label": "Refresh Token (auto-managed / optional evcc fallback)",
             "repeat": false,
             "newLine": true,
             "xs": 12,
@@ -170,9 +170,12 @@
         },
         "_fallbackDocLink": {
             "type": "staticLink",
-            "label": "Anleitung: bluelink_refresh_token",
+            "label": "Token-documentation",
             "button": true,
-            "href": "https://github.com/RustyDust/bluelink_refresh_token",
+            "variant": "outlined",
+            "color": "primary",
+            "icon": "info",
+            "href": "https://github.com/Newan/ioBroker.bluelink#authentication--initial-setup-eu-hyundai--kia",
             "newLine": true,
             "xs": 12,
             "sm": 12,
@@ -186,43 +189,48 @@
             "size": 2,
             "newLine": true
         },
+        "request": {
+            "type": "number",
+            "label": "Request max 400",
+            "min": 1,
+            "max": 400,
+            "newLine": true,
+            "xs": 12,
+            "sm": 12,
+            "md": 6,
+            "lg": 3,
+            "xl": 3
+        },
+        "errorCounter": {
+            "type": "number",
+            "label": "errorCounter",
+            "min": 1,
+            "max": 50,
+            "xs": 12,
+            "sm": 12,
+            "md": 6,
+            "lg": 3,
+            "xl": 3
+        },
         "evHistory": {
             "type": "checkbox",
             "label": "Receive Daily drive History (EV cars only, needs 3 request per day)",
             "newLine": true,
             "xs": 12,
             "sm": 12,
-            "md": 8,
-            "lg": 4,
-            "xl": 4
+            "md": 12,
+            "lg": 12,
+            "xl": 12
         },
         "protectAgainstDeepDischarge": {
             "type": "checkbox",
             "label": "Stop refresh if 12V battery is under 10.5 V to protect against irreversible damage",
-            "xs": 12,
-            "sm": 12,
-            "md": 8,
-            "lg": 4,
-            "xl": 4
-        },
-        "request": {
-            "type": "text",
-            "label": "Request max 400",
             "newLine": true,
             "xs": 12,
             "sm": 12,
-            "md": 8,
-            "lg": 3,
-            "xl": 3
-        },
-        "errorCounter": {
-            "type": "text",
-            "label": "errorCounter",
-            "xs": 12,
-            "sm": 12,
-            "md": 8,
-            "lg": 3,
-            "xl": 3
+            "md": 12,
+            "lg": 12,
+            "xl": 12
         },
         "resAddress": {
             "type": "checkbox",
@@ -230,9 +238,9 @@
             "newLine": true,
             "xs": 12,
             "sm": 12,
-            "md": 8,
-            "lg": 4,
-            "xl": 4
+            "md": 12,
+            "lg": 12,
+            "xl": 12
         }
     }
 }
