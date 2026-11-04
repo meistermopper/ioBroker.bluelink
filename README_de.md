@@ -128,6 +128,7 @@ Da Hyundai und Kia den alten europäischen OAuth-Endpunkt dauerhaft abgeschaltet
 ## Changelog
 
 ### **WORK IN PROGRESS**
+* (meistermopper) Automatischer In-Memory-Fallback auf vollständigen CCI-Login ergänzt, falls der Token-Refresh im laufenden Betrieb mit `HTTP 401 (code 9030: jwt-expired / Token expired)` fehlschlägt.
 * (meistermopper) Veralteten Bereich „Fallback / Refresh Token“ aus der Admin-UI (jsonConfig) und Dokumentation entfernt, da die OneApp/CCI-Authentifizierung vollständig automatisch erfolgt.
 * (meistermopper) Ausführliche deutsche und englische Dokumentation zur automatischen OneApp/CCI-Authentifizierung, Konfiguration und Datenpunkten ergänzt.
 * (meistermopper) Admin-UI und i18n-Übersetzungen in allen 11 unterstützten Sprachen modernisiert.

@@ -137,6 +137,7 @@ Since Hyundai and Kia permanently disabled the legacy European OAuth login endpo
 ## Changelog
 
 ### **WORK IN PROGRESS**
+* (meistermopper) Fall back to in-memory full CCI login when runtime CCI token refresh fails (`HTTP 401 code 9030 jwt-expired / Token expired`)
 * (meistermopper) Remove obsolete manual Refresh Token / Fallback section from Admin UI and documentation since OneApp/CCI authentication is fully automatic
 * (meistermopper) Add comprehensive English and German documentation for automated OneApp/CCI authentication, configuration options, and data points
 * (meistermopper) Modernize Admin UI and i18n translations across all 11 supported languages

@@ -76,6 +76,7 @@ class Bluelink extends utils.Adapter {
         this._lastTokenCheck = 0;
         this._cciTokenSet = null; // in-memory only - see prepareCciSession()
         this._cciPersistedRefreshToken = null; // last refreshToken written to disk - see persistRotatedCciTokenIfNeeded()
+        this._cciRefreshPromise = null;
         this._isUnloading = false;
     }
 
@@ -772,14 +773,45 @@ class Bluelink extends utils.Adapter {
             if (nowSec < sess.tokenExpiresAt - 10) {
                 return 'Token not expired, no need to refresh';
             }
-            const refreshed = await tokenManager.refreshCciToken(this.config.brand, this._cciTokenSet, msg => this.log.debug(msg));
-            this._cciTokenSet = refreshed.cci;
-            sess.accessToken = refreshed.accessToken;
-            sess.tokenExpiresAt = Math.floor(Date.now() / 1000) + (refreshed.cci.ccsExpiresIn || refreshed.cci.expiresIn || 3599) - 60;
-            this.setState('info.tokenExpiry', new Date((sess.tokenExpiresAt + 60) * 1000).toISOString(), true);
-            this.setState('info.lastTokenRefresh', Date.now(), true);
-            this.log.info('[refreshAccessToken] CCS token refreshed via CCI (kept in memory, not persisted)');
-            return 'Token refreshed';
+            if (this._cciRefreshPromise) {
+                return await this._cciRefreshPromise;
+            }
+            this._cciRefreshPromise = (async () => {
+                let refreshed;
+                try {
+                    refreshed = await tokenManager.refreshCciToken(this.config.brand, this._cciTokenSet, msg => this.log.debug(msg));
+                    this.log.info('[refreshAccessToken] CCS token refreshed via CCI (kept in memory, not persisted)');
+                } catch (err) {
+                    const msg = err instanceof Error ? err.message : String(err);
+                    if (!this.config.username || !this.config.password) {
+                        throw err;
+                    }
+                    this.log.warn(`[refreshAccessToken] CCI token refresh failed (${msg}) — falling back to full login in memory`);
+                    const full = await tokenManager.fetchToken(
+                        this.config.brand,
+                        this.config.username,
+                        this.config.password,
+                        m => this.log.debug(m),
+                        this._cciTokenSet && this._cciTokenSet.deviceId,
+                    );
+                    if (!full.cci) {
+                        throw new Error('Full login fallback did not return a CCI token set');
+                    }
+                    refreshed = { accessToken: full.accessToken, cci: full.cci };
+                    this.log.info('[refreshAccessToken] CCS token renewed via full CCI login (kept in memory, not persisted)');
+                }
+                this._cciTokenSet = refreshed.cci;
+                sess.accessToken = refreshed.accessToken;
+                sess.tokenExpiresAt = Math.floor(Date.now() / 1000) + (refreshed.cci.ccsExpiresIn || refreshed.cci.expiresIn || 3599) - 60;
+                this.setState('info.tokenExpiry', new Date((sess.tokenExpiresAt + 60) * 1000).toISOString(), true);
+                this.setState('info.lastTokenRefresh', Date.now(), true);
+                return 'Token refreshed';
+            })();
+            try {
+                return await this._cciRefreshPromise;
+            } finally {
+                this._cciRefreshPromise = null;
+            }
         };
     }
 
